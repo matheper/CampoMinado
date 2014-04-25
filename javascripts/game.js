@@ -39,8 +39,14 @@ function gameLoop(){
 function drawMatriz(){
     for(i=0; i<matrizCampos.length; i++){
         for(j=0; j<matrizCampos[i].length; j++){
-            if(matrizCampos[i][j]){
+            context.strokeStyle = "blue";
+            context.strokeRect(j*tamanho, i*tamanho, tamanho, tamanho);
+            if (matrizCampos[i][j] instanceof Bomba){
                 drawObj(matrizCampos[i][j]);
+            }
+            else{
+                context.fillStyle = "rgb(255,255,255)";
+                context.fillText(matrizCampos[i][j], j*tamanho + tamanho/2, i*tamanho + tamanho/2);
             }
         }
     }
@@ -54,14 +60,17 @@ function clearCanvas(){
     canvas.width = canvas.width;
 }
 
-Bomba = function(linha, coluna){
+function Bomba(linha, coluna){
     var sprite = new Image();
     sprite.src = "images/bomba.png";
-    return{
-        x:linha * tamanho,
-        y:coluna * tamanho,
-        sprite:sprite,
-    }
+    this.sprite = sprite;
+    this.x = linha * tamanho;
+    this.y = coluna * tamanho;
+//    return{
+//        x:linha * tamanho,
+//        y:coluna * tamanho,
+//        sprite:sprite,
+//    }
 }
 
 function criarCampos(num_linhas, num_colunas, num_bombas){
@@ -77,17 +86,45 @@ function criarCampos(num_linhas, num_colunas, num_bombas){
         if(!matrizCampos[indice_linha][indice_coluna]){
             matrizCampos[indice_linha][indice_coluna] = new Bomba(indice_coluna,
                                                                   indice_linha);
-            console.log(indice_linha, indice_coluna);
-            console.log(bombas_criadas);
             bombas_criadas ++;
         }
     }
 
     for(var i=0; i<num_linhas; i++) {
         for(var j=0; j<num_colunas; j++){
-//            console.log(matrizCampos[i],[j]);
+            if(!matrizCampos[i][j]){
+                matrizCampos[i][j] = contarBombas(i,j);
+            }
         }
     }
 
 }
 
+
+function contarBombas(linha, coluna){
+    bomba = 0;
+
+    if (matrizCampos[linha][coluna -1] instanceof Bomba)
+        bomba ++;
+    if (matrizCampos[linha][coluna +1] instanceof Bomba)
+        bomba ++;
+
+    if ( matrizCampos[linha -1]){
+        if (matrizCampos[linha -1][coluna -1] instanceof Bomba)
+            bomba ++;
+        if (matrizCampos[linha -1][coluna] instanceof Bomba)
+            bomba ++;
+        if (matrizCampos[linha -1][coluna +1] instanceof Bomba)
+            bomba ++;
+    }
+
+    if (matrizCampos[linha +1]){
+        if (matrizCampos[linha +1][coluna -1] instanceof Bomba)
+            bomba ++;
+        if (matrizCampos[linha +1][coluna] instanceof Bomba)
+            bomba ++;
+        if (matrizCampos[linha +1][coluna +1] instanceof Bomba)
+            bomba ++;
+    }
+    return bomba;
+}
