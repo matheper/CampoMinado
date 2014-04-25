@@ -3,7 +3,10 @@ var context;
 var keysPressed = [];
 var matrizCampos = [];
 var tamanho = 32;
-var estado_jogo;
+var estado_jogo = 0;
+var num_linhas = 10;
+var num_colunas = 20;
+var num_bombas = 20;
 
 window.onload = function(){
     startUp();
@@ -32,9 +35,6 @@ function getMousePos(canvas, evt) {
 function startUp(){
     canvas = document.getElementById('game_canvas');
     context = canvas.getContext('2d');
-    num_linhas = 10;
-    num_colunas = 20;
-    num_bombas = 20;
     criarCampos(num_linhas, num_colunas, num_bombas);
     canvas.setAttribute('height', num_linhas * tamanho);
     canvas.setAttribute('width', num_colunas * tamanho);
@@ -45,6 +45,9 @@ function startUp(){
         linha = Math.floor(mousePos.y/tamanho)
         coluna = Math.floor(mousePos.x/tamanho)
         matrizCampos[linha][coluna].mostrar = true;
+        if (estado_jogo){
+            reiniciar();
+        }
         if (matrizCampos[linha][coluna] instanceof Bomba){
             gameOver();
         }
@@ -56,6 +59,13 @@ function startUp(){
 function gameLoop(){
     drawMatriz();
 //    clearCanvas();
+}
+
+function reiniciar(){
+    estado_jogo = 0;
+    criarCampos(num_linhas, num_colunas, num_bombas);
+    clearCanvas();
+
 }
 
 function gameOver(){
