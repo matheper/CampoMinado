@@ -5,8 +5,9 @@ var matrizCampos = [];
 var tamanho = 32;
 var estado_jogo = 0;
 var num_linhas = 10;
-var num_colunas = 20;
-var num_bombas = 20;
+var num_colunas = 10;
+var num_bombas = 10;
+var num_numeros = num_linhas * num_colunas - num_bombas
 
 window.onload = function(){
     startUp();
@@ -39,6 +40,7 @@ function startUp(){
     canvas.setAttribute('height', num_linhas * tamanho);
     canvas.setAttribute('width', num_colunas * tamanho);
     drawMatriz();
+    var num_abertos = 0;
 
     canvas.addEventListener('mousedown', function(evt) {
         var mousePos = getMousePos(canvas, evt);
@@ -51,7 +53,12 @@ function startUp(){
         if (matrizCampos[linha][coluna] instanceof Bomba){
             gameOver();
         }
-//        clearCanvas();
+        else{
+            num_abertos++;
+            if (num_abertos >= num_numeros){
+                estado_jogo = 1;
+            }
+        }
         drawMatriz();
     }, false);
 }
@@ -93,9 +100,17 @@ function drawMatriz(){
         }
     }
     if(estado_jogo == -1){
-        context.fillStyle = "blue";
-        context.font = "bold 50pt sans-serif";
-        context.fillText("Game Over", context.canvas.clientWidth / 2 - 200,
+        context.fillStyle = "red";
+        context.font = "bold 12pt sans-serif";
+        context.textAlign="center";
+        context.fillText("Game Over", context.canvas.clientWidth / 2,
+                                      context.canvas.clientHeight / 2);
+    }
+    if(estado_jogo == 1){
+        context.fillStyle = "red";
+        context.font = "bold 12pt sans-serif";
+        context.textAlign="center";
+        context.fillText("You Win!", context.canvas.clientWidth / 2,
                                       context.canvas.clientHeight / 2);
     }
 }
