@@ -3,6 +3,7 @@ var context;
 var keysPressed = [];
 var matrizCampos = [];
 var tamanho = 32;
+var estado_jogo;
 
 window.onload = function(){
     startUp();
@@ -19,6 +20,15 @@ $(document).keyup(function(e){
     keysPressed[e.keyCode] = false;
 });
 
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
+
+
 function startUp(){
     canvas = document.getElementById('game_canvas');
     context = canvas.getContext('2d');
@@ -28,7 +38,19 @@ function startUp(){
     criarCampos(num_linhas, num_colunas, num_bombas);
     canvas.setAttribute('height', num_linhas * tamanho);
     canvas.setAttribute('width', num_colunas * tamanho);
-    window.setInterval( function(){ gameLoop();}, 15);
+    drawMatriz();
+
+    canvas.addEventListener('mousedown', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+        linha = Math.floor(mousePos.y/tamanho)
+        coluna = Math.floor(mousePos.x/tamanho)
+        matrizCampos[linha][coluna].mostrar = true;
+        if (matrizCampos[linha][coluna] instanceof Bomba){
+            gameOver();
+        }
+//        clearCanvas();
+        drawMatriz();
+    }, false);
 }
 
 function gameLoop(){
@@ -36,24 +58,45 @@ function gameLoop(){
 //    clearCanvas();
 }
 
+function gameOver(){
+    estado_jogo = -1;
+    for(i=0; i<matrizCampos.length; i++){
+        for(j=0; j<matrizCampos[i].length; j++){
+            matrizCampos[i][j].mostrar = true;
+        }
+    }
+}
+
 function drawMatriz(){
     for(i=0; i<matrizCampos.length; i++){
         for(j=0; j<matrizCampos[i].length; j++){
             context.strokeStyle = "blue";
             context.strokeRect(j*tamanho, i*tamanho, tamanho, tamanho);
-            if (matrizCampos[i][j] instanceof Bomba){
-                drawObj(matrizCampos[i][j]);
-            }
-            else{
-                context.fillStyle = "rgb(255,255,255)";
-                context.fillText(matrizCampos[i][j], j*tamanho + tamanho/2, i*tamanho + tamanho/2);
+            if (matrizCampos[i][j].mostrar){
+                if (matrizCampos[i][j] instanceof Bomba){
+                    drawBomba(matrizCampos[i][j]);
+                }
+                else{
+                    drawNumero(matrizCampos[i][j]);
+                }
             }
         }
     }
+    if(estado_jogo == -1){
+        context.fillStyle = "blue";
+        context.font = "bold 50pt sans-serif";
+        context.fillText("Game Over", context.canvas.clientWidth / 2 - 200,
+                                      context.canvas.clientHeight / 2);
+    }
 }
 
-function drawObj(obj){
+function drawBomba(obj){
     context.drawImage(obj.sprite, obj.x, obj.y, 32, 32);
+}
+
+function drawNumero(obj){
+    context.fillStyle = "rgb(255,255,255)";
+    context.fillText(obj.num_bombas, obj.x, obj.y);
 }
 
 function clearCanvas(){
@@ -66,11 +109,14 @@ function Bomba(linha, coluna){
     this.sprite = sprite;
     this.x = linha * tamanho;
     this.y = coluna * tamanho;
-//    return{
-//        x:linha * tamanho,
-//        y:coluna * tamanho,
-//        sprite:sprite,
-//    }
+    this.mostrar = false;
+}
+
+function Numero(linha, coluna, num_bombas){
+    this.x = linha * tamanho + tamanho/2;
+    this.y = coluna * tamanho + tamanho/2;
+    this.num_bombas = num_bombas;
+    this.mostrar = false;
 }
 
 function criarCampos(num_linhas, num_colunas, num_bombas){
@@ -93,7 +139,8 @@ function criarCampos(num_linhas, num_colunas, num_bombas){
     for(var i=0; i<num_linhas; i++) {
         for(var j=0; j<num_colunas; j++){
             if(!matrizCampos[i][j]){
-                matrizCampos[i][j] = contarBombas(i,j);
+                bombas = contarBombas(i,j);
+                matrizCampos[i][j] = new Numero(j, i, bombas);
             }
         }
     }
