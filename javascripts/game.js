@@ -1,6 +1,5 @@
 var canvas;
 var context;
-var keysPressed = [];
 var matrizCampos = [];
 var tamanho = 32;
 var estado_jogo = 0;
@@ -12,17 +11,6 @@ var num_numeros = num_linhas * num_colunas - num_bombas
 window.onload = function(){
     startUp();
 }
-
-$(document).keydown(function(e){
-    var haskey = keysPressed[e.keyCode];
-    if(!haskey){
-        keysPressed[e.keyCode] = true;
-    }
-});
-
-$(document).keyup(function(e){
-    keysPressed[e.keyCode] = false;
-});
 
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
@@ -65,14 +53,12 @@ function startUp(){
 
 function gameLoop(){
     drawMatriz();
-//    clearCanvas();
 }
 
 function reiniciar(){
     estado_jogo = 0;
     criarCampos(num_linhas, num_colunas, num_bombas);
     clearCanvas();
-
 }
 
 function gameOver(){
